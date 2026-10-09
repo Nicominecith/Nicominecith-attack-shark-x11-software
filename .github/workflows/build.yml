@@ -38,7 +38,7 @@ jobs:
       - run: |
           sudo apt-get install -y ninja-build
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" || true
-          sudo rm -rf $ANDROID_HOME/platforms/android-36*
+          find $ANDROID_HOME/platforms -mindepth 1 -maxdepth 1 ! -name android-34 -exec sudo rm -rf {} +
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME ANDROID_SDK_ROOT=$ANDROID_HOME
           QTA=$(dirname $QT_ROOT_DIR)/android_arm64_v8a
           $QTA/bin/qt-cmake -G Ninja -B build-android -DQT_HOST_PATH=$QT_ROOT_DIR -DANDROID_SDK_ROOT=$ANDROID_HOME \
