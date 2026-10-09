@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.21)
+project(nicominecith-x11 VERSION 3.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOMOC ON)
+find_package(Qt6 REQUIRED COMPONENTS Quick Concurrent)
+qt_standard_project_setup()
+
+qt_add_executable(nicominecith-x11 src/main.cpp src/device.cpp src/device.h)
+set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+qt_add_qml_module(nicominecith-x11 URI Nico VERSION 1.0
+  QML_FILES qml/Main.qml qml/Theme.qml qml/Seg.qml qml/Card.qml
+  RESOURCES assets/mouse.png assets/icon.png)
+target_link_libraries(nicominecith-x11 PRIVATE Qt6::Quick Qt6::Concurrent)
+
+if(LINUX AND NOT ANDROID)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
+  target_include_directories(nicominecith-x11 PRIVATE ${LIBUSB_INCLUDE_DIRS})
+  target_link_libraries(nicominecith-x11 PRIVATE ${LIBUSB_LIBRARIES})
+else()
+  include(FetchContent)
+  FetchContent_Declare(libusb GIT_REPOSITORY https://github.com/libusb/libusb-cmake.git GIT_TAG v1.0.27-0)
+  FetchContent_MakeAvailable(libusb)
+  target_link_libraries(nicominecith-x11 PRIVATE usb-1.0)
+endif()
+
+if(ANDROID)
+  set_target_properties(nicominecith-x11 PROPERTIES QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/android)
+elseif(WIN32)
+  set_target_properties(nicominecith-x11 PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+install(TARGETS nicominecith-x11 RUNTIME DESTINATION bin)
